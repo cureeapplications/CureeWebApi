@@ -7,22 +7,23 @@ from datetime import datetime
 
 
 
-def createEvent(doctormail, attendeemail, unixdate):
+def createEvent(doctormail, attendeemail, startunix, endunix):
   service = get_calendar_service()
-  d = datetime.fromtimestamp(unixdate)
+  d = datetime.fromtimestamp(int(str(startunix)[:-3]))
+  e = datetime.fromtimestamp(int(str(endunix)[:-3]))
   start = d.isoformat()
-  end = (d + timedelta(hours=1)).isoformat()
+  end = e.isoformat()
   event_result = service.events().insert(calendarId='primary', conferenceDataVersion= 1,
       body={
 'summary': 'Doctor Appointment',
 'location': 'Bellary',
 'description': 'A chance to hear more about Corona Treatment.',
 'start': {
-  'dateTime':  d.isoformat(),
+  'dateTime':  start,
   'timeZone': 'Asia/Kolkata',
 },
 'end': {
-  'dateTime': (d + timedelta(hours=1)).isoformat(),
+  'dateTime': end,
   'timeZone': 'Asia/Kolkata',
 },
 'recurrence': [
@@ -54,8 +55,26 @@ def findAllAppointments():
   xep = requests.get(url)
   inp = xep.json()
   # input_list = [{'doctorname':"Pramod",'statusid':0}, {'doctorname':"Nityay",'statusid':1},{'doctorname':"Batnuj",'statusid':0}, {'doctorname':"Brityay",'statusid':1}]
-  filtered = list(filter(lambda x: x['statusid'] == 0, inp))
-  return filtered
+  # filtered = list(filter(lambda x: x['statusid'] == 0, inp))
+  return inp
 
+def updateBookedStatus(appid):
+  url = "https://oeco2uan71.execute-api.ap-south-1.amazonaws.com/api/Appointment/UpdateStatus/{}".format(appid)
+  xep = requests.get(url)
+  print(xep)
+
+
+# def main():
+#   list = findAllAppointments()
+#   if list:
+#       for x in list:
+#         try:
+#           createEvent(x["Doc_Email"], x["Ptn_Email"], x["Start"], x["End"])
+#           updateBookedStatus(x["Id"])
+#         except:
+#           print("failed")
+
+# if __name__ == "__main__":
+#     main()
 
 
